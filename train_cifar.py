@@ -27,7 +27,7 @@ def main():
             if args.project_name is None:
                 raise ValueError("args.log_to_wandb set to True but args.project_name is None")
             import os
-            os.environ["WANDB_API_KEY"] = "e9fea86aa89b0de39aef1ddc0e4cc49c079ea5c4"
+            os.environ["WANDB_API_KEY"] = ""
             os.environ["WANDB_MODE"] = "offline"
 
             run = wandb.init(
