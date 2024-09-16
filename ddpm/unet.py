@@ -346,7 +346,7 @@ class UNet(nn.Module):
         self.out_conv = nn.Conv2d(base_channels, img_channels, 3, padding=1)
     
     def forward(self, x, time=None, y=None):
-        ip = self.initial_pad
+        ip = self.initial_pad  # 0
         if ip != 0:
             x = F.pad(x, (ip,) * 4)
 
@@ -354,20 +354,20 @@ class UNet(nn.Module):
             if time is None:
                 raise ValueError("time conditioning was specified but tim is not passed")
             
-            time_emb = self.time_mlp(time)
+            time_emb = self.time_mlp(time)  # (bs, 512)
         else:
             time_emb = None
         
         if self.num_classes is not None and y is None:
             raise ValueError("class conditioning was specified but y is not passed")
         
-        x = self.init_conv(x)
+        x = self.init_conv(x)  # (bs, 128, 32, 32)
 
         skips = [x]
 
         for layer in self.downs:
             x = layer(x, time_emb, y)
-            skips.append(x)
+            skips.append(x)  # len()=12
         
         for layer in self.mid:
             x = layer(x, time_emb, y)

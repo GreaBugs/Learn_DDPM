@@ -2,7 +2,8 @@ import argparse
 import datetime
 import torch
 import wandb
-
+import sys
+sys.path.append("/data3/shenbaoyue/code/DDPM/ddpm")
 from torch.utils.data import DataLoader
 from torchvision import datasets
 from ddpm import script_utils
@@ -14,6 +15,7 @@ def main():
 
     try:
         diffusion = script_utils.get_diffusion_from_args(args).to(device)
+        print(diffusion)
         optimizer = torch.optim.Adam(diffusion.parameters(), lr=args.learning_rate)
 
         if args.model_checkpoint is not None:
@@ -24,6 +26,9 @@ def main():
         if args.log_to_wandb:
             if args.project_name is None:
                 raise ValueError("args.log_to_wandb set to True but args.project_name is None")
+            import os
+            os.environ["WANDB_API_KEY"] = "e9fea86aa89b0de39aef1ddc0e4cc49c079ea5c4"
+            os.environ["WANDB_MODE"] = "offline"
 
             run = wandb.init(
                 project=args.project_name,
@@ -64,8 +69,8 @@ def main():
             diffusion.train()
 
             x, y = next(train_loader)
-            x = x.to(device)
-            y = y.to(device)
+            x = x.to(device)  # 图像 (128, 3, 32, 32)
+            y = y.to(device)  # label (128, )
 
             if args.use_labels:
                 loss = diffusion(x, y)
@@ -129,7 +134,7 @@ def main():
 
 
 def create_argparser():
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    device = torch.device("cuda:2") if torch.cuda.is_available() else torch.device("cpu")
     run_name = datetime.datetime.now().strftime("ddpm-%Y-%m-%d-%H-%M")
     defaults = dict(
         learning_rate=2e-4,
@@ -140,7 +145,7 @@ def create_argparser():
         log_rate=1000,
         checkpoint_rate=1000,
         log_dir="~/ddpm_logs",
-        project_name=None,
+        project_name="simple",
         run_name=run_name,
 
         model_checkpoint=None,

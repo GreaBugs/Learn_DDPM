@@ -7,7 +7,14 @@ from functools import partial
 from copy import deepcopy
 
 from .ema import EMA
-from .utils import extract
+# from .utils import extract
+
+
+def extract(a, t, x_shape):  # 1000， 128， （128， 3， 32， 32）
+    b, *_ = t.shape  # (bs, )
+    out = a.gather(-1, t)  # (bs,)
+    return out.reshape(b, *((1,) * (len(x_shape) - 1)))
+
 
 class GaussianDiffusion(nn.Module):
     __doc__ = r"""Gaussian Diffusion model. Forwarding through the module returns diffusion reversal scalar loss tensor.
@@ -139,10 +146,10 @@ class GaussianDiffusion(nn.Module):
         )   
 
     def get_losses(self, x, t, y):
-        noise = torch.randn_like(x)
+        noise = torch.randn_like(x)  # (bs, c, H, W)
 
-        perturbed_x = self.perturb_x(x, t, noise)
-        estimated_noise = self.model(perturbed_x, t, y)
+        perturbed_x = self.perturb_x(x, t, noise)  # (bs, c, H, W)  加噪后的t时刻的图像
+        estimated_noise = self.model(perturbed_x, t, y)  # (bs, 3, H, W)
 
         if self.loss_type == "l1":
             loss = F.l1_loss(estimated_noise, noise)
@@ -152,7 +159,7 @@ class GaussianDiffusion(nn.Module):
         return loss
 
     def forward(self, x, y=None):
-        b, c, h, w = x.shape
+        b, c, h, w = x.shape  # 128, 3, 32, 32
         device = x.device
 
         if h != self.img_size[0]:
@@ -160,7 +167,7 @@ class GaussianDiffusion(nn.Module):
         if w != self.img_size[0]:
             raise ValueError("image width does not match diffusion parameters")
         
-        t = torch.randint(0, self.num_timesteps, (b,), device=device)
+        t = torch.randint(0, self.num_timesteps, (b,), device=device)  # 随机时间步
         return self.get_losses(x, t, y)
 
 
