@@ -2,17 +2,13 @@
 
 An implementation of Denoising Diffusion Probabilistic Models for image generation written in PyTorch. This roughly follows the original code by Ho et al. Unlike their implementation, however, my model allows for class conditioning through bias in residual blocks. 
 
-## Experiments
-
-I have trained the model on MNIST and CIFAR-10 datasets. The model seemed to converge well on the MNIST dataset, producing realistic samples. However, I am yet to report the same CIFAR-10 quality that Ho. et al. provide in their paper. Here are the samples generated with a linear schedule after 2000 epochs:
-
-![Samples after 2000 epochs](resources/samples_linear_200.png)
-
-Here is a sample of a diffusion sequence on MNIST:
-
-<p align="center">
-  <img src="resources/diffusion_sequence_mnist.gif" />
-</p>
+## 框架图
+![overview_train](resources/train.png)
+## 加噪
+![noise](resources/加噪.png)
+## 去噪
+![denoise](resources/去噪.png)
+## 损失函数
 
 
 ## Resources
